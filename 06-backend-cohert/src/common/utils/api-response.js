@@ -1,5 +1,4 @@
 class ApiResponse {
-  // shared shape for every non-empty success response
   static send(res, statusCode, message, data = null) {
     return res.status(statusCode).json({
       success: true,
