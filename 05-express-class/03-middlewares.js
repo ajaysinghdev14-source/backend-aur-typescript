@@ -3,6 +3,7 @@ import express from "express";
 function block_1_middlewares() {
   return new Promise((resolve) => {
     const app = express();
+
     app.use(express.json());
 
     const logs = [];
@@ -53,6 +54,22 @@ function block_1_middlewares() {
         next();
       };
     }
+
+    function rateLimit(maxRequest) {
+      let count = 0;
+
+      return (req, res, next) => {
+        count++;
+        if (count > maxRequest) {
+          return res.status(429).json({ error: "too many requests" });
+        }
+        next();
+      };
+    }
+
+    const limitedEndPoint = rateLimit(5);
+
+    app.get("/limited", limitedEndPoint, (req, res) => {});
 
     app.get("/profile", authMe, getRole("admin"), () => {}); // this is the way to use middlewares
 
