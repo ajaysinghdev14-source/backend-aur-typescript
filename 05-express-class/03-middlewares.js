@@ -32,6 +32,30 @@ function block_1_middlewares() {
       next();
     });
 
+    function authMe(req, res, next) {
+      const token = req.headers["x-auth-token"];
+      if (!token) return res.status(401).json({ error: "no token provided" });
+
+      if (token !== "secret-chaicode")
+        return res.status(403).json({ error: "invalid token" });
+
+      // token -> extract data from token
+      req.user = { id: 1, name: "mike", role: "admin" };
+
+      next();
+    }
+
+    function getRole(role) {
+      return (req, res, next) => {
+        if (!req.user || req.user.role !== role)
+          return res.status(403).json({ error: "forbidden" });
+
+        next();
+      };
+    }
+
+    app.get("/profile", authMe, getRole("admin"), () => {}); // this is the way to use middlewares
+
     const server = app.listen(0, async () => {
       const port = server.address().port;
       const base = `http://127.0.0.1:${port}`;
