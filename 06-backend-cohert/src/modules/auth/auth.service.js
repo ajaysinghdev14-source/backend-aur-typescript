@@ -93,13 +93,13 @@ const refresh = async (refreshToken) => {
 };
 
 const logout = async (userId) => {
-  const user = await User.findById(userId).select("+refreshToken");
+  const user = await User.findByIdAndUpdate(userId, {
+    refreshToken: null,
+  });
+
   if (!user) {
     throw ApiError.unauthorized("User not found");
   }
-
-  user.refreshToken = null;
-  await user.save({ validateBeforeSave: false });
 };
 
 export { register, login, refresh, logout };
