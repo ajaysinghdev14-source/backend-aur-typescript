@@ -53,7 +53,7 @@ const login = async ({ email, password }) => {
   // Compare the supplied password with the stored hash.
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    throw ApiError.unauthorized("Invalid password");
+    throw ApiError.unauthorized("Invalid email or password");
   }
 
   // Unverified accounts cannot obtain authentication tokens.
