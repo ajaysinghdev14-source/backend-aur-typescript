@@ -102,4 +102,19 @@ const logout = async (userId) => {
   }
 };
 
-export { register, login, refresh, logout };
+const forgotPassword = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw ApiError.notFound("User not found");
+  }
+
+  const { rawtoken, hashedToken } = generateResetToken();
+  user.resetPasswordToken = hashedToken;
+  user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 mins from now
+
+  await user.save({ validateBeforeSave: false });
+
+  // TODO: send an email to user with the raw reset token: rawtoken
+};
+
+export { register, login, refresh, logout, forgotPassword };
