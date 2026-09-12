@@ -1,6 +1,15 @@
 import User from "./user.model.js";
 import ApiError from "../../common/utils/api-error.js";
-import { generateResetToken } from "../../common/utils/jwt.utils.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  generateResetToken,
+} from "../../common/utils/jwt.utils.js";
+import { valid } from "joi";
+
+const hashToken = (token) => {
+  return crypto.createHash("sha256").update(token).digest("hex");
+};
 
 const register = async (userData) => {
   const existing = await User.findOne({ email: userData.email });
@@ -27,4 +36,29 @@ const register = async (userData) => {
   return userObj;
 };
 
-export { register };
+const login = async ({ email, password }) => {
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) {
+    throw ApiError.unauthorized("User not found");
+  }
+
+  // assume some how i will check password - we will come later on this
+
+  if (!user.isVerified) {
+    throw ApiError.forbidden("User not verified");
+  }
+
+  const accessToken = generateAccessToken({ id: user._id });
+  const refreshToken = generateRefreshToken({ id: user._id });
+
+  user.refreshToken = hashToken(refreshToken);
+  await user.save({ validateBeforeSave: false });
+
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.refreshToken;
+
+  return { user: userObj, accessToken, refreshToken };
+};
+
+export { register, login };
