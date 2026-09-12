@@ -29,4 +29,15 @@ const authenticate = async (req, res, next) => {
   next();
 };
 
-export { authenticate };
+const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      throw ApiError.forbidden(
+        "You are not authorized to access this resource",
+      );
+    }
+    next();
+  };
+};
+
+export { authenticate, authorize };
