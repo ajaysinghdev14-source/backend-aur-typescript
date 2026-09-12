@@ -10,17 +10,21 @@ const register = async (userData) => {
 
   const { rawtoken, hashedToken } = generateResetToken();
 
-  await User.create({
+  const user = await User.create({
     name: userData.name,
     email: userData.email,
     password: userData.password,
     role: "user",
-    resetToken: hashedToken,
-    resetTokenExpiry: Date.now() + 3600000, // 1 hour from now
+    verificationToken: hashedToken,
   });
 
-  const newUser = await User.create(userData);
-  return newUser;
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.verificationToken;
+
+  // TODO: send an email to user with token: rawToken
+
+  return userObj;
 };
 
 export { register };
