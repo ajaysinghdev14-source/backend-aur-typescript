@@ -47,4 +47,11 @@ const logout = async (req, res) => {
   ApiResponse.ok(res, null, "User logged out successfully");
 };
 
-export { register, login, logout };
+// Retrieves the authenticated user's profile information.
+const getMe = async (req, res) => {
+  const userId = req.user.id;
+  const user = await authService.getMe(userId);
+  ApiResponse.ok(res, user, "User profile retrieved successfully");
+};
+
+export { register, login, logout, getMe };

@@ -140,4 +140,19 @@ const forgotPassword = async (email) => {
   // TODO: send an email to the user containing the raw reset token.
 };
 
-export { register, login, refresh, logout, forgotPassword };
+const getMe = async (userId) => {
+  // Retrieve the authenticated user's profile information.
+  const user = await User.findById(userId);
+  if (!user) {
+    throw ApiError.notFound("User not found");
+  }
+
+  // Remove sensitive fields before returning the user object.
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.refreshToken;
+
+  return userObj;
+};
+
+export { register, login, refresh, logout, forgotPassword, getMe };
