@@ -19,5 +19,8 @@ router.post("/login", validate(LoginDto), authController.login);
 // Retrieve the authenticated user's profile information.
 router.get("/me", authenticate, authController.getMe);
 
+// Logout the authenticated user and clear their tokens.
+router.post("/logout", authenticate, authController.logout);
+
 // Export the router so it can be mounted in the main application.
 export default router;
