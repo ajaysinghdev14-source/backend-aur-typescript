@@ -4,8 +4,10 @@ import {
   generateAccessToken,
   generateRefreshToken,
   generateResetToken,
+  verifyRefreshToken,
 } from "../../common/utils/jwt.utils.js";
 import { valid } from "joi";
+import { verify } from "jsonwebtoken";
 
 const hashToken = (token) => {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -61,4 +63,33 @@ const login = async ({ email, password }) => {
   return { user: userObj, accessToken, refreshToken };
 };
 
-export { register, login };
+const refresh = async (refreshToken) => {
+  if (!refreshToken) {
+    throw ApiError.unauthorized("Refresh token is required");
+  }
+
+  const decoded = verifyRefreshToken(refreshToken);
+  const user = await User.findById(decoded.id).select("+refreshToken");
+
+  if (!user) {
+    throw ApiError.unauthorized("User not found");
+  }
+
+  if (user.refreshToken !== hashToken(refreshToken)) {
+    throw ApiError.unauthorized("Invalid refresh token");
+  }
+
+  const accessToken = generateAccessToken({ id: user._id });
+  const newRefreshToken = generateRefreshToken({ id: user._id });
+
+  user.refreshToken = hashToken(newRefreshToken);
+  await user.save({ validateBeforeSave: false });
+
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.refreshToken;
+
+  return { user: userObj, accessToken, refreshToken: newRefreshToken };
+};
+
+export { register, login, refresh };
