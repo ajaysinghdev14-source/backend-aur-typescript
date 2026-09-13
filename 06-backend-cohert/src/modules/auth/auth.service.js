@@ -6,6 +6,7 @@ import {
   generateResetToken,
   verifyRefreshToken,
 } from "../../common/utils/jwt.utils.js";
+import { sendVerificationEmail } from "../../common/config/email.js";
 
 const hashToken = (token) => {
   // Store only a one-way hash of refresh tokens so the original token is not
@@ -39,6 +40,11 @@ const register = async (userData) => {
   delete userObj.verificationToken;
 
   // TODO: send an email to the user containing the raw verification token.
+  try {
+    await sendVerificationEmail(user.email, rawtoken);
+  } catch (error) {
+    console.error("Failed to send verification email:", error);
+  }
 
   return userObj;
 };
@@ -154,5 +160,7 @@ const getMe = async (userId) => {
 
   return userObj;
 };
+
+const verifyEmail = async (token) => {};
 
 export { register, login, refresh, logout, forgotPassword, getMe };
