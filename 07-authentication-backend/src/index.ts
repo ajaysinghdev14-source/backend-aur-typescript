@@ -7,7 +7,7 @@ async function main() {
     const server = http.createServer(createExpressApplication());
 
     // Keep the port in one place so it is easy to change for another environment.
-    const port: number = 3000;
+    const port: number = 8080;
 
     server.listen(port, () => {
       console.log(`Authentication API listening at http://localhost:${port}`);
