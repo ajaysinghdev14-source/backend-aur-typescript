@@ -161,6 +161,21 @@ const getMe = async (userId) => {
   return userObj;
 };
 
-const verifyEmail = async (token) => {};
+const verifyEmail = async (token) => {
+  const hashedToken = hashToken(token);
+  const user = await User.findOne({ verificationToken: hashedToken }).select(
+    "+verificationToken",
+  );
 
-export { register, login, refresh, logout, forgotPassword, getMe };
+  if (!user) {
+    throw ApiError.notFound("Invalid or expired verification token");
+  }
+
+  user.isVerified = true;
+  user.verificationToken = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  return { message: "Email successfully verified" };
+};
+
+export { register, login, refresh, logout, forgotPassword, getMe, verifyEmail };
